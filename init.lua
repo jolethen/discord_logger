@@ -28,9 +28,9 @@ local function send_to_discord(message)
         method = "POST",
         data = minetest.write_json({ content = message }),
         extra_headers = { "Content-Type: application/json" },
-    }, function(_res)
-        if not _res.succeeded then
-            minetest.log("error", "[discord_logger] Failed to send message: " .. tostring(_res.code or "unknown"))
+    }, function(res)
+        if not res.succeeded then
+            minetest.log("error", "[discord_logger] Failed to send message: " .. tostring(res.code or "unknown"))
         end
     end)
 end
@@ -52,7 +52,7 @@ end)
 
 minetest.register_on_leaveplayer(function(player, timed_out)
     local name = player:get_player_name()
-    local reason = timed_out and " (timed out)" or ""
+    local reason = timed_out and " (timed out)" or " (left)"
     send_to_discord(":arrow_left: **" .. name .. "** left the game" .. reason .. ".")
 end)
 
