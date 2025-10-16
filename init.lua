@@ -1,5 +1,5 @@
 -- Discord Logger for Minetest
--- Author: Jole (Enhanced: webhook from config + full activity logs)
+-- Author: Jole (Stable version — config-based webhook + join/leave/place/break/command/start/shutdown logs)
 
 local http = minetest.request_http_api()
 if not http then
@@ -16,7 +16,7 @@ else
     minetest.log("action", "[discord_logger] Webhook loaded from config.")
 end
 
--- ======= Helper Function: Send to Discord =======
+-- ======= Helper Function: Send Message to Discord =======
 local function send_to_discord(message)
     if not webhook_url or webhook_url == "" then
         minetest.log("warning", "[discord_logger] No webhook configured, skipping message: " .. message)
@@ -28,9 +28,9 @@ local function send_to_discord(message)
         method = "POST",
         data = minetest.write_json({ content = message }),
         extra_headers = { "Content-Type: application/json" },
-    }, function(result)
-        if not result.succeeded then
-            minetest.log("error", "[discord_logger] Failed to send message: " .. (result.code or "unknown"))
+    }, function(_res)
+        if not _res.succeeded then
+            minetest.log("error", "[discord_logger] Failed to send message: " .. tostring(_res.code or "unknown"))
         end
     end)
 end
@@ -58,12 +58,12 @@ end)
 
 -- ======= Command Execution =======
 minetest.register_on_chatcommand(function(name, command, params)
-    if not name then return end
+    if not name or name == "" then return end
     send_to_discord(":keyboard: **" .. name .. "** executed `/" .. command .. " " .. (params or "") .. "`")
 end)
 
 -- ======= Block Placement =======
-minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack, pointed_thing)
+minetest.register_on_placenode(function(pos, newnode, placer)
     if not placer then return end
     local name = placer:get_player_name()
     local nodename = newnode.name or "unknown"
@@ -78,7 +78,4 @@ minetest.register_on_dignode(function(pos, oldnode, digger)
     local nodename = oldnode.name or "unknown"
     local position = minetest.pos_to_string(pos)
     send_to_discord(":pick: **" .. name .. "** broke `" .. nodename .. "` at " .. position)
-end)
-minetest.register_on_chatcommand(function(name, command, params)
-    send_to_discord(":keyboard: **" .. name .. "** executed `/" .. command .. " " .. params .. "`")
 end)
