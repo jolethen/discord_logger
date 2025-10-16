@@ -1,5 +1,6 @@
--- Discord Logger for Minetest
--- Author: Jole (Stable version — config-based webhook + join/leave/place/break/command/start/shutdown logs)
+-- Discord Logger for Minetest (Debug Version)
+-- Author: Jole
+-- Features: Config-based webhook, join/leave/place/break/command/start/shutdown logs, debug logging
 
 local http = minetest.request_http_api()
 if not http then
@@ -8,18 +9,20 @@ if not http then
 end
 
 -- ======= Load Webhook from Config =======
-local webhook_url = minetest.settings:get("discord_logger_webhook")
+local webhook_url = minetest.settings:get("discord_relay") -- using your existing setting
 
 if not webhook_url or webhook_url == "" then
-    minetest.log("error", "[discord_logger] Missing 'discord_logger_webhook' in minetest.conf!")
+    minetest.log("error", "[discord_logger] Missing 'discord_relay' in minetest.conf!")
 else
-    minetest.log("action", "[discord_logger] Webhook loaded from config.")
+    minetest.log("action", "[discord_logger] Webhook loaded from config: " .. webhook_url)
 end
 
 -- ======= Helper Function: Send Message to Discord =======
 local function send_to_discord(message)
+    minetest.log("action", "[discord_logger] Attempting to send: " .. message)
+
     if not webhook_url or webhook_url == "" then
-        minetest.log("warning", "[discord_logger] No webhook configured, skipping message: " .. message)
+        minetest.log("warning", "[discord_logger] No webhook configured, skipping message.")
         return
     end
 
@@ -28,9 +31,12 @@ local function send_to_discord(message)
         method = "POST",
         data = minetest.write_json({ content = message }),
         extra_headers = { "Content-Type: application/json" },
+        timeout = 5,
     }, function(res)
-        if not res.succeeded then
-            minetest.log("error", "[discord_logger] Failed to send message: " .. tostring(res.code or "unknown"))
+        if res.succeeded then
+            minetest.log("action", "[discord_logger] Message sent successfully!")
+        else
+            minetest.log("error", "[discord_logger] Failed to send message. HTTP code: " .. tostring(res.code or "unknown") .. ", error: " .. tostring(res.error or "none"))
         end
     end)
 end
