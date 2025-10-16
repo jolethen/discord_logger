@@ -6,17 +6,7 @@ A mod which brodcasts in-game logs to discord using webhook system totally free 
 
 **Step 1-** Go to ``world.mt`` and add ``discord_logger = true``
 **Step 2-** Go to ``minetest.conf`` at ``secure.http_mods`` add discord_logger if more then one mod is using http support use like ``secure.http_mods = xyz,zys,discord_logger`` dont add space between commas(,) or it wont work
-**Step3-** Go to ``discord_logger`` in mods/worldmods
-**Step 4-** go to ``config.lua`` inside ``discord_logger`` you'll see a structure like
-
-``-- Discord webhook configuration
-discord_logger = {}
-discord_logger.webhook_url =``
-After discord_logger.webhook_url = add ur webhook link, at last ur structure will look like 
-
-``-- Discord webhook configuration
-discord_logger = {}
-discord_logger.webhook_url = "https://discord.com/api/webhooks/xyz"``
+**Step3-** Go to ``minetest.conf`` and add ``discord_logger_webhook = https://discord.com/api/webhooks/XXXXXXXX/YYYYYYYY``
 
 # Important note-
 
